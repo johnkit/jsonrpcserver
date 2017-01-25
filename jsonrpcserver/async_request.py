@@ -1,7 +1,7 @@
 """Asynchronous request"""
 
 from .request import Request
-from .response import ExceptionResponse, NotificationResponse, RequestResponse
+from .response import ExceptionResponse, RequestResponse
 
 class AsyncRequest(Request):
     """Asynchronous request"""
@@ -23,11 +23,11 @@ class AsyncRequest(Request):
                                          **(self.kwargs or {}))
                 # Set the response
                 if self.is_notification:
-                    self.response = NotificationResponse()
+                    self.response = None
                 else:
                     self.response = RequestResponse(self.request_id, result) #pylint:disable=redefined-variable-type
-        # Ensure the response has been set
-        assert self.response, 'Call must set response'
-        assert isinstance(self.response, (ExceptionResponse, \
-            NotificationResponse, RequestResponse)), 'Invalid response type'
+                    # Ensure the response has been set
+                    assert self.response, 'Call must set response'
+                    assert isinstance(self.response, (ExceptionResponse, \
+                        RequestResponse)), 'Invalid response type'
         return self.response

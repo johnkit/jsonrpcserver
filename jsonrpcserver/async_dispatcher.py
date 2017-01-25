@@ -3,7 +3,7 @@
 import asyncio
 from .dispatcher import Requests
 from .async_request import AsyncRequest
-from .response import BatchResponse, NotificationResponse
+from .response import BatchResponse
 from . import config
 
 class AsyncRequests(Requests): #pylint:disable=too-few-public-methods
@@ -24,17 +24,14 @@ class AsyncRequests(Requests): #pylint:disable=too-few-public-methods
                 self.response = BatchResponse(await asyncio.gather(
                     *[r.call(methods) for r in map(self.request_type,
                       self.requests) if not r.is_notification]))
-                # If the response list is empty, it should return nothing
-                if not self.response:
-                    self.response = NotificationResponse() #pylint:disable=redefined-variable-type
             # Single request
             else:
                 self.response = await self.request_type(self.requests) \
                     .call(methods)
-        assert self.response, 'Response must be set'
-        assert self.response.http_status, 'Must have http_status set'
-        if config.log_responses:
-            self._log_response(self.response)
+        if self.response:
+            assert self.response.http_status, 'Must have http_status set'
+            if config.log_responses:
+                self._log_response(self.response)
         return self.response
 
 async def dispatch(methods, requests):

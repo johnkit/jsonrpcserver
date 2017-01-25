@@ -11,7 +11,7 @@ import json
 from six import string_types
 
 from .log import log_
-from .response import NotificationResponse, ExceptionResponse, BatchResponse
+from .response import ExceptionResponse, BatchResponse
 from .request import Request
 from .exceptions import JsonRpcServerError, ParseError, InvalidRequest
 from .status import HTTP_STATUS_CODES
@@ -95,15 +95,13 @@ class Requests(object): #pylint:disable=too-few-public-methods
                     [r.call(methods) for r in map(self.request_type,
                      self.requests) if not r.is_notification])
                 # If the response list is empty, return nothing
-                if not self.response:
-                    self.response = NotificationResponse() #pylint:disable=redefined-variable-type
             # Single request
             else:
                 self.response = self.request_type(self.requests).call(methods)
-        assert self.response, 'Response must be set'
-        assert self.response.http_status, 'Must have http_status set'
-        if config.log_responses:
-            self._log_response(self.response)
+                assert self.response, 'Response must be set'
+                assert self.response.http_status, 'Must have http_status set'
+                if config.log_responses:
+                    self._log_response(self.response)
         return self.response
 
 

@@ -8,8 +8,7 @@ from functools import partial
 
 from jsonrpcserver.request import Request, _convert_camel_case, \
     _convert_camel_case_keys
-from jsonrpcserver.response import ErrorResponse, RequestResponse, \
-    NotificationResponse
+from jsonrpcserver.response import ErrorResponse, RequestResponse
 from jsonrpcserver.exceptions import InvalidParams, MethodNotFound
 from jsonrpcserver.methods import Methods
 from jsonrpcserver import status
@@ -261,48 +260,34 @@ class TestRequestProcessNotifications(TestCase):
         logging.disable(logging.CRITICAL)
 
     def tearDown(self):
-        config.notification_errors = False
+        pass
 
     # Success
     def test_success(self):
         req = Request({'jsonrpc': '2.0', 'method': 'foo'}).call([foo])
-        self.assertIsInstance(req, NotificationResponse)
+        self.assertIsNone(req)
 
     def test_method_not_found(self):
         req = Request({'jsonrpc': '2.0', 'method': 'baz'}).call([foo])
-        self.assertIsInstance(req, NotificationResponse)
+        self.assertIsNone(req)
 
     def test_invalid_params(self):
         def foo(bar): # pylint: disable=redefined-outer-name,unused-argument
             return 'bar'
         req = Request({'jsonrpc': '2.0', 'method': 'foo'}).call([foo])
-        self.assertIsInstance(req, NotificationResponse)
+        self.assertIsNone(req)
 
     def test_explicitly_raised_exception(self):
         def foo(): # pylint: disable=redefined-outer-name
             raise InvalidParams()
         req = Request({'jsonrpc': '2.0', 'method': 'foo'}).call([foo])
-        self.assertIsInstance(req, NotificationResponse)
+        self.assertIsNone(req)
 
     def test_uncaught_exception(self):
         def foo(): # pylint: disable=redefined-outer-name
             return 1/0
         req = Request({'jsonrpc': '2.0', 'method': 'foo'}).call([foo])
-        self.assertIsInstance(req, NotificationResponse)
-
-    # Configuration
-    def test_config_notification_errors_on(self):
-        # Should return "method not found" error
-        request = Request({'jsonrpc': '2.0', 'method': 'baz'})
-        config.notification_errors = True
-        req = request.call([foo])
-        self.assertIsInstance(req, ErrorResponse)
-
-    def test_configuring_http_status(self):
-        NotificationResponse.http_status = status.HTTP_OK
-        req = Request({'jsonrpc': '2.0', 'method': 'foo'}).call([foo])
-        self.assertEqual(status.HTTP_OK, req.http_status)
-        NotificationResponse.http_status = status.HTTP_NO_CONTENT
+        self.assertIsNone(req)
 
 
 class TestRequestProcessRequests(TestCase):

@@ -45,19 +45,6 @@ def _sort_response(response):
     return req
 
 
-class NotificationResponse(object): #pylint:disable=too-few-public-methods
-    """Returned from processing a successful `notification
-    <http://www.jsonrpc.org/specification#notification>`_ (i.e. a request with
-    no ``id`` member).
-    """
-
-    #: The HTTP status to send in response to notifications.
-    http_status = status.HTTP_NO_CONTENT
-
-    def __str__(self):
-        return ''
-
-
 class _Response(dict):
     """Parent of the other responses."""
 

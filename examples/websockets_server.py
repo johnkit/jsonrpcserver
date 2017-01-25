@@ -9,7 +9,8 @@ async def ping():
 async def main(websocket, path):
     request = await websocket.recv()
     response = await methods.dispatch(request)
-    await websocket.send(str(response))
+    if response:
+        await websocket.send(str(response))
 
 start_server = websockets.serve(main, 'localhost', 5000)
 asyncio.get_event_loop().run_until_complete(start_server)

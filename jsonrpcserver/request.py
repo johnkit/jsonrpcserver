@@ -20,7 +20,7 @@ import jsonschema
 
 from . import config
 from .log import log_
-from .response import RequestResponse, NotificationResponse, ExceptionResponse
+from .response import RequestResponse, ExceptionResponse
 from .exceptions import JsonRpcServerError, InvalidRequest, InvalidParams, \
     MethodNotFound
 
@@ -161,8 +161,8 @@ class Request(object):
                 log_(_LOGGER, 'error', traceback.format_exc())
             # Notifications should not be responded to, even for errors (unless
             # overridden in configuration)
-            if self.is_notification and not config.notification_errors:
-                self.response = NotificationResponse()
+            if self.is_notification:
+                self.response = None
             else:
                 self.response = ExceptionResponse( #pylint:disable=redefined-variable-type
                     exc, getattr(self, 'request_id', None))
@@ -205,11 +205,11 @@ class Request(object):
                 result = callable_(*(self.args or []), **(self.kwargs or {}))
                 # Set the response
                 if self.is_notification:
-                    self.response = NotificationResponse()
+                    self.response = None
                 else:
                     self.response = RequestResponse(self.request_id, result) #pylint:disable=redefined-variable-type
         # Ensure the response has been set
         assert self.response, 'Call must set response'
         assert isinstance(self.response, (ExceptionResponse, \
-            NotificationResponse, RequestResponse)), 'Invalid response type'
+            RequestResponse)), 'Invalid response type'
         return self.response

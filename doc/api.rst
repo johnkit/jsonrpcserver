@@ -16,7 +16,7 @@ Response
 ========
 
 .. automodule:: jsonrpcserver.response
-    :exclude-members: ExceptionResponse, NotificationResponse, RequestResponse,
+    :exclude-members: ExceptionResponse, RequestResponse,
         ErrorResponse, BatchResponse
 
 Validation

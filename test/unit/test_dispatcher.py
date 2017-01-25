@@ -5,7 +5,7 @@ from unittest import TestCase, main
 
 from jsonrpcserver.dispatcher import dispatch, Requests
 from jsonrpcserver.exceptions import ParseError
-from jsonrpcserver.response import ErrorResponse, NotificationResponse, \
+from jsonrpcserver.response import ErrorResponse, \
     RequestResponse, BatchResponse
 from jsonrpcserver import config
 
@@ -44,7 +44,7 @@ class TestDispatchNotifications(TestCase):
     # Success
     def test(self):
         req = dispatch([foo], '{"jsonrpc": "2.0", "method": "foo"}')
-        self.assertIsInstance(req, NotificationResponse)
+        self.assertIsNone(req)
 
     def test_invalid_str(self):
         # Single quotes around identifiers are invalid!
@@ -53,7 +53,7 @@ class TestDispatchNotifications(TestCase):
 
     def test_object(self):
         req = dispatch([foo], {'jsonrpc': '2.0', 'method': 'foo'})
-        self.assertIsInstance(req, NotificationResponse)
+        self.assertIsNone(req)
 
     # Errors
     def test_parse_error(self):
@@ -61,14 +61,9 @@ class TestDispatchNotifications(TestCase):
         self.assertIsInstance(req, ErrorResponse)
         self.assertEqual('Parse error', req['error']['message'])
 
-    def test_notification_errors_disabled(self):
+    def test_notification_error(self):
         req = dispatch([foo], {'jsonrpc': '2.0', 'method': 'non_existant'})
-        self.assertIsInstance(req, NotificationResponse)
-
-    def test_notification_errors_enabled(self):
-        config.notification_errors = True
-        req = dispatch([foo], {'jsonrpc': '2.0', 'method': 'non_existant'})
-        self.assertIsInstance(req, ErrorResponse)
+        self.assertIsNone(req)
 
 
 class TestDispatchRequests(TestCase):
@@ -121,9 +116,9 @@ class TestDispatchSpecificationExamples(TestCase):
         req = dispatch(
             methods,
             {"jsonrpc": "2.0", "method": "update", "params": [1, 2, 3, 4, 5]})
-        self.assertIsInstance(req, NotificationResponse)
+        self.assertIsNone(req)
         req = dispatch(methods, {"jsonrpc": "2.0", "method": "foobar"})
-        self.assertIsInstance(req, NotificationResponse)
+        self.assertIsNone(req)
 
     def test_invalid_json(self):
         req = dispatch(
@@ -181,7 +176,7 @@ class TestDispatchSpecificationExamples(TestCase):
             [foo],
             [{'jsonrpc': '2.0', 'method': 'notify_sum', 'params': [1, 2, 4]},
              {'jsonrpc': '2.0', 'method': 'notify_hello', 'params': [7]}])
-        self.assertIsInstance(req, NotificationResponse)
+        self.assertIsNone(req)
 
 
 if __name__ == '__main__':
